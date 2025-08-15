@@ -4,24 +4,31 @@ import pandas as pd
 import joblib
 from huggingface_hub import hf_hub_download
 
-# HF Model Repo
-HF_MODEL_REPO = "abhilashmanchala/wellness_tourism_model"
-
-# If model is private, use token from environment
-HF_TOKEN = os.getenv("HF_TOKEN")
-
-# Download model (pipeline includes preprocessor)
-model_path = hf_hub_download(
-    repo_id=HF_MODEL_REPO,
-    filename="best_tourism_model_v1.joblib",
-    repo_type="model",
-    token=HF_TOKEN
-)
-
-# Load model pipeline (preprocessor + estimator)
-model = joblib.load(model_path)
-
+st.set_page_config(page_title="Wellness Tourism Prediction", layout="centered")
 st.title("🏝 Wellness Tourism Package Prediction")
+
+try:
+    # Hugging Face Model Repo
+    HF_MODEL_REPO = "abhilashmanchala/wellness_tourism_model"
+    HF_TOKEN = os.getenv("HF_TOKEN")
+
+    st.write("📥 Downloading model from Hugging Face...")
+    model_path = hf_hub_download(
+        repo_id=HF_MODEL_REPO,
+        filename="best_tourism_model_v1.joblib",
+        repo_type="model",
+        token=HF_TOKEN
+    )
+    st.success("✅ Model downloaded successfully!")
+
+    st.write("📦 Loading model pipeline...")
+    model = joblib.load(model_path)
+    st.success("✅ Model loaded successfully!")
+
+except Exception as e:
+    st.error(f"❌ Error loading model: {e}")
+    st.stop()
+
 st.write("Fill the details below to predict if the customer will purchase the package.")
 
 # Input fields
@@ -44,7 +51,6 @@ product_pitched = st.selectbox("Product Pitched", ["Basic", "Deluxe", "Super Del
 num_followups = st.number_input("Number Of Followups", min_value=0, step=1)
 pitch_duration = st.number_input("Duration Of Pitch", min_value=0, step=1)
 
-# Create DataFrame for input
 input_df = pd.DataFrame([{
     "Age": age,
     "TypeofContact": typeofcontact,
@@ -67,11 +73,16 @@ input_df = pd.DataFrame([{
 }])
 
 if st.button("Predict"):
-    # Pass raw data — pipeline will preprocess
-    prediction = model.predict(input_df)[0]
+    try:
+        st.write("🛠 Running prediction...")
+        prediction = model.predict(input_df)[0]
+        st.write(f"Raw prediction output: {prediction}")
 
-    if prediction == 1:
-        st.success("✅ Customer is likely to purchase the Wellness Tourism Package!")
-    else:
-        st.error("❌ Customer is not likely to purchase the package.")
+        if prediction == 1:
+            st.success("✅ Customer is likely to purchase the Wellness Tourism Package!")
+        else:
+            st.error("❌ Customer is not likely to purchase the package.")
+    except Exception as e:
+        st.error(f"❌ Prediction failed: {e}")
+
 
