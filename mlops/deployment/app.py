@@ -1,3 +1,4 @@
+import os
 import streamlit as st
 import pandas as pd
 import joblib
@@ -5,12 +6,28 @@ from huggingface_hub import hf_hub_download
 
 # HF Model Repo
 HF_MODEL_REPO = "abhilashmanchala/wellness_tourism_model"
-api = HfApi(token=os.getenv("HF_TOKEN"))
 
-# Download model & preprocessor from Hugging Face Model Hub
-model_path = hf_hub_download(repo_id=HF_MODEL_REPO, filename="best_tourism_model_v1.joblib", repo_type="model")
+# If model is private, use token from environment
+HF_TOKEN = os.getenv("HF_TOKEN")
 
+# Download model
+model_path = hf_hub_download(
+    repo_id=HF_MODEL_REPO,
+    filename="best_tourism_model_v1.joblib",
+    repo_type="model",
+    token=HF_TOKEN
+)
+
+preprocessor_path = hf_hub_download(
+    repo_id=HF_MODEL_REPO,
+    filename="preprocessor.joblib",
+    repo_type="model",
+    token=HF_TOKEN
+)
+
+# Load model and preprocessor
 model = joblib.load(model_path)
+preprocessor = joblib.load(preprocessor_path)
 
 st.title("🏝 Wellness Tourism Package Prediction")
 st.write("Fill the details below to predict if the customer will purchase the package.")
@@ -58,7 +75,6 @@ input_df = pd.DataFrame([{
 }])
 
 if st.button("Predict"):
-    # Transform input using preprocessor
     processed_input = preprocessor.transform(input_df)
     prediction = model.predict(processed_input)[0]
 
