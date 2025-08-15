@@ -18,16 +18,8 @@ model_path = hf_hub_download(
     token=HF_TOKEN
 )
 
-preprocessor_path = hf_hub_download(
-    repo_id=HF_MODEL_REPO,
-    filename="preprocessor.joblib",
-    repo_type="model",
-    token=HF_TOKEN
-)
-
 # Load model and preprocessor
 model = joblib.load(model_path)
-preprocessor = joblib.load(preprocessor_path)
 
 st.title("🏝 Wellness Tourism Package Prediction")
 st.write("Fill the details below to predict if the customer will purchase the package.")
