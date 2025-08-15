@@ -10,7 +10,7 @@ HF_MODEL_REPO = "abhilashmanchala/wellness_tourism_model"
 # If model is private, use token from environment
 HF_TOKEN = os.getenv("HF_TOKEN")
 
-# Download model
+# Download model (pipeline includes preprocessor)
 model_path = hf_hub_download(
     repo_id=HF_MODEL_REPO,
     filename="best_tourism_model_v1.joblib",
@@ -18,7 +18,7 @@ model_path = hf_hub_download(
     token=HF_TOKEN
 )
 
-# Load model and preprocessor
+# Load model pipeline (preprocessor + estimator)
 model = joblib.load(model_path)
 
 st.title("🏝 Wellness Tourism Package Prediction")
@@ -67,10 +67,11 @@ input_df = pd.DataFrame([{
 }])
 
 if st.button("Predict"):
-    
-    prediction = model.predict(processed_input)[0]
+    # Pass raw data — pipeline will preprocess
+    prediction = model.predict(input_df)[0]
 
     if prediction == 1:
         st.success("✅ Customer is likely to purchase the Wellness Tourism Package!")
     else:
         st.error("❌ Customer is not likely to purchase the package.")
+
