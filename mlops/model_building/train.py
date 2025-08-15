@@ -139,23 +139,25 @@ with mlflow.start_run():
     mlflow.log_artifact(model_path, artifact_path="model")
     print(f"Model saved as artifact at: {model_path}")
 
-    # HF Upload
+    api = HfApi(token=os.getenv("HF_TOKEN"))
+    # Upload to Hugging Face
     repo_id = "abhilashmanchala/wellness_tourism_model"
     repo_type = "model"
 
+    # Step 1: Check if the space exists
     try:
-      api.repo_info(repo_id=repo_id, repo_type=repo_type)
-      print(f"Repo '{repo_id}' already exists.")
+        api.repo_info(repo_id=repo_id, repo_type=repo_type)
+        print(f"Space '{repo_id}' already exists. Using it.")
     except RepositoryNotFoundError:
-      print(f"Repo '{repo_id}' not found. Creating...")
-      create_repo(repo_id=repo_id, repo_type=repo_type, private=False, token=hf_token)
-      print(f"Repo '{repo_id}' created.")
+        print(f"Space '{repo_id}' not found. Creating new space...")
+        create_repo(repo_id=repo_id, repo_type=repo_type, private=False)
+        print(f"Space '{repo_id}' created.")
 
+    # create_repo("churn-model", repo_type="model", private=False)
     api.upload_file(
-      path_or_fileobj="best_tourism_model_v1.joblib",
-      path_in_repo="best_tourism_model_v1.joblib",
-      repo_id=repo_id,
-      repo_type=repo_type,
-      token=hf_token
-      )
-    print("✅ Model uploaded to Hugging Face Hub")
+        path_or_fileobj="best_tourism_model_v1.joblib",
+        path_in_repo="best_tourism_model_v1.joblib",
+        repo_id=repo_id,
+        repo_type=repo_type,
+        token = api
+    )
