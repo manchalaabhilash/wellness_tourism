@@ -67,7 +67,7 @@ input_df = pd.DataFrame([{
 }])
 
 if st.button("Predict"):
-    processed_input = preprocessor.transform(input_df)
+    
     prediction = model.predict(processed_input)[0]
 
     if prediction == 1:
